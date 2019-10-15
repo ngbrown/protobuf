@@ -41,6 +41,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#elif defined(GOOGLE_PROTOBUF_HAVE_UCOS)
+#include <ucos.h>
 #else
 #include <sched.h>
 #endif
@@ -55,6 +57,8 @@ namespace {
 void SchedYield() {
 #ifdef _WIN32
   Sleep(0);
+#elif defined(GOOGLE_PROTOBUF_HAVE_UCOS)
+  OSTimeDly(0);
 #else  // POSIX
   sched_yield();
 #endif

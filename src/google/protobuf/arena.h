@@ -53,7 +53,9 @@ using type_info = ::type_info;
 #include <google/protobuf/stubs/atomicops.h>
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/logging.h>
+#if !defined(GOOGLE_PROTOBUF_HAVE_UCOS)
 #include <google/protobuf/stubs/mutex.h>
+#endif
 #include <google/protobuf/stubs/type_traits.h>
 
 
@@ -893,7 +895,9 @@ class LIBPROTOBUF_EXPORT Arena {
                              // ptrs and cleanup methods.
 
   bool owns_first_block_;    // Indicates that arena owns the first block
+#if !defined(GOOGLE_PROTOBUF_HAVE_UCOS)
   Mutex blocks_lock_;
+#endif
 
   void AddBlock(Block* b);
   // Access must be synchronized, either by blocks_lock_ or by being called from

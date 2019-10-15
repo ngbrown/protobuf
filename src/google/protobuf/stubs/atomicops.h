@@ -53,9 +53,6 @@
 #ifndef GOOGLE_PROTOBUF_ATOMICOPS_H_
 #define GOOGLE_PROTOBUF_ATOMICOPS_H_
 
-// Don't include this file for people not concerned about thread safety.
-#ifndef GOOGLE_PROTOBUF_NO_THREAD_SAFETY
-
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/platform_macros.h>
 
@@ -63,7 +60,7 @@ namespace google {
 namespace protobuf {
 namespace internal {
 
-#if defined(GOOGLE_PROTOBUF_ARCH_POWER)
+#if defined(GOOGLE_PROTOBUF_ARCH_POWER) || defined(GOOGLE_PROTOBUF_ARCH_M68K)
 #if defined(_LP64) || defined(__LP64__)
 typedef int32 Atomic32;
 typedef intptr_t Atomic64;
@@ -171,6 +168,10 @@ Atomic64 Release_Load(volatile const Atomic64* ptr);
 }  // namespace protobuf
 }  // namespace google
 
+
+// Don't include this file for people not concerned about thread safety.
+#ifndef GOOGLE_PROTOBUF_NO_THREAD_SAFETY
+
 // Include our platform specific implementation.
 #define GOOGLE_PROTOBUF_ATOMICOPS_ERROR \
 "Atomic operations are not supported on your platform"
@@ -216,6 +217,8 @@ Atomic64 Release_Load(volatile const Atomic64* ptr);
 #include <google/protobuf/stubs/atomicops_internals_pnacl.h>
 #elif defined(GOOGLE_PROTOBUF_ARCH_PPC)
 #include <google/protobuf/stubs/atomicops_internals_ppc_gcc.h>
+#elif defined(GOOGLE_PROTOBUF_HAVE_UCOS)
+#include <google/protobuf/stubs/atomicops_internals_generic_no_safety.h>
 #elif (((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)) || (__GNUC__ > 4))
 #include <google/protobuf/stubs/atomicops_internals_generic_gcc.h>
 #elif defined(__clang__)
@@ -240,6 +243,10 @@ Atomic64 Release_Load(volatile const Atomic64* ptr);
 #endif
 
 #undef GOOGLE_PROTOBUF_ATOMICOPS_ERROR
+
+#else   // GOOGLE_PROTOBUF_NO_THREAD_SAFETY
+
+#include <google/protobuf/stubs/atomicops_internals_generic_no_safety.h>
 
 #endif  // GOOGLE_PROTOBUF_NO_THREAD_SAFETY
 

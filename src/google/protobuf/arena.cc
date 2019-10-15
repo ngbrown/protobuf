@@ -40,7 +40,12 @@ namespace protobuf {
 
 
 google::protobuf::internal::SequenceNumber Arena::lifecycle_id_generator_;
-#if defined(GOOGLE_PROTOBUF_NO_THREADLOCAL)
+#if defined(GOOGLE_PROTOBUF_HAVE_UCOS)
+Arena::ThreadCache& Arena::thread_cache() {
+  static ThreadCache thread_cache_ = {-1, NULL };
+  return thread_cache_;
+}
+#elif defined(GOOGLE_PROTOBUF_NO_THREADLOCAL)
 Arena::ThreadCache& Arena::thread_cache() {
   static internal::ThreadLocalStorage<ThreadCache>* thread_cache_ =
       new internal::ThreadLocalStorage<ThreadCache>();
@@ -144,7 +149,9 @@ Arena::Block* Arena::NewBlock(void* me, Block* my_last_block, size_t n,
 }
 
 void Arena::AddBlock(Block* b) {
+#if !defined(GOOGLE_PROTOBUF_HAVE_UCOS)
   MutexLock l(&blocks_lock_);
+#endif
   AddBlockInternal(b);
 }
 

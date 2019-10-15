@@ -30,7 +30,7 @@
 #ifndef GOOGLE_PROTOBUF_STUBS_MUTEX_H_
 #define GOOGLE_PROTOBUF_STUBS_MUTEX_H_
 
-#ifdef GOOGLE_PROTOBUF_NO_THREADLOCAL
+#if defined(GOOGLE_PROTOBUF_NO_THREADLOCAL) && !defined(GOOGLE_PROTOBUF_HAVE_UCOS)
 #include <pthread.h>
 #endif
 
@@ -103,7 +103,7 @@ class LIBPROTOBUF_EXPORT MutexLockMaybe {
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(MutexLockMaybe);
 };
 
-#if defined(GOOGLE_PROTOBUF_NO_THREADLOCAL)
+#if defined(GOOGLE_PROTOBUF_NO_THREADLOCAL) && !defined(GOOGLE_PROTOBUF_HAVE_UCOS)
 template<typename T>
 class ThreadLocalStorage {
  public:
