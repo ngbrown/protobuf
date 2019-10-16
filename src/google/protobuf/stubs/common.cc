@@ -44,6 +44,8 @@
 #define snprintf _snprintf    // see comment in strutil.cc
 #elif defined(HAVE_PTHREAD)
 #include <pthread.h>
+#elif defined(HAVE_UCOS)
+#include <ucos.h>
 #else
 #error "No suitable threading library available."
 #endif
@@ -315,6 +317,54 @@ void Mutex::Unlock() {
 void Mutex::AssertHeld() {
   // pthreads dosn't provide a way to check which thread holds the mutex.
   // TODO(kenton):  Maybe keep track of locking thread ID like with WIN32?
+}
+
+#elif defined(HAVE_UCOS)
+
+// Implement for uC/OS
+struct Mutex::Internal {
+    OS_CRIT mutex;
+#ifndef NDEBUG
+  // Used only to implement AssertHeld().
+  BYTE task_id;
+#endif
+};
+
+Mutex::Mutex()
+  : mInternal(new Internal) {
+    OSCritInit(&mInternal->mutex);
+}
+
+Mutex::~Mutex() {
+  delete mInternal;
+}
+
+void Mutex::Lock() {
+  if (OSRunning)
+  {
+    OSCritEnter(&mInternal->mutex, 0);
+
+#ifndef NDEBUG
+    mInternal->task_id = OSTaskID();
+#endif
+  }
+}
+
+void Mutex::Unlock() {
+#ifndef NDEBUG
+    mInternal->task_id = 0;
+#endif
+
+  if (OSRunning)
+  {
+    OSCritLeave(&mInternal->mutex);
+  }
+}
+
+void Mutex::AssertHeld() {
+#ifndef NDEBUG
+  GOOGLE_DCHECK_EQ(mInternal->task_id, OSTaskID());
+#endif
 }
 
 #endif

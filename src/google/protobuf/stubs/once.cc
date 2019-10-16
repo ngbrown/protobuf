@@ -37,10 +37,14 @@
 
 #include <google/protobuf/stubs/once.h>
 
+#include "config.h"
+
 #ifndef GOOGLE_PROTOBUF_NO_THREAD_SAFETY
 
 #ifdef _WIN32
 #include <windows.h>
+#elif defined(HAVE_UCOS)
+#include <ucos.h>
 #else
 #include <sched.h>
 #endif
@@ -55,6 +59,8 @@ namespace {
 void SchedYield() {
 #ifdef _WIN32
   Sleep(0);
+#elif defined(HAVE_UCOS)
+  OSTimeDly(0);
 #else  // POSIX
   sched_yield();
 #endif
